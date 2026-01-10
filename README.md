@@ -2,6 +2,10 @@
 
 A simple, futuristic pool scoreboard application for tracking frames between two players.
 
+## Live Demo
+
+🎱 **[Try it now!](https://danpuzey.github.io/Phildemo/)**
+
 ## Features
 
 - ✨ Futuristic, accessible UI with neon cyberpunk styling
