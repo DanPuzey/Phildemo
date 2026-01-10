@@ -49,18 +49,6 @@ body {
   }
 }
 
-.title {
-  text-align: center;
-  font-size: 3rem;
-  margin-bottom: 2rem;
-  text-transform: uppercase;
-  letter-spacing: 4px;
-  color: #00ffff;
-  text-shadow:
-    0 0 10px rgba(0, 255, 255, 0.8),
-    0 0 20px rgba(0, 255, 255, 0.4);
-}
-
 .timer-section {
   display: flex;
   flex-direction: column;
@@ -234,10 +222,6 @@ body {
 }
 
 @media (max-width: 768px) {
-  .title {
-    font-size: 2rem;
-  }
-
   .timer {
     font-size: 3rem;
   }

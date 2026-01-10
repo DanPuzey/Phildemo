@@ -58,17 +58,17 @@ export default function App() {
   return (
     <div className="app">
       <div className="scoreboard">
-        <h1 className="title">Pool Scoreboard</h1>
-
         <div className="timer-section">
           <div className="timer">{formatTime(seconds)}</div>
-          <button
-            className="timer-btn"
-            onClick={handleTimerStart}
-            aria-label="Start timer"
-          >
-            Start Timer
-          </button>
+          {!isTimerRunning && (
+            <button
+              className="timer-btn"
+              onClick={handleTimerStart}
+              aria-label="Start timer"
+            >
+              Start Timer
+            </button>
+          )}
         </div>
 
         <div className="players">
