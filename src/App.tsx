@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
+const STORAGE_KEY = 'pool-scoreboard-state';
+
 export default function App() {
   const [player1Name, setPlayer1Name] = useState('Player 1');
   const [player2Name, setPlayer2Name] = useState('Player 2');
@@ -8,12 +10,61 @@ export default function App() {
   const [player2Score, setPlayer2Score] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timerStartTime, setTimerStartTime] = useState<number | null>(null);
   const intervalRef = useRef<number | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
+  // Load state from localStorage on mount
   useEffect(() => {
-    if (isTimerRunning) {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        setPlayer1Name(state.player1Name || 'Player 1');
+        setPlayer2Name(state.player2Name || 'Player 2');
+        setPlayer1Score(state.player1Score || 0);
+        setPlayer2Score(state.player2Score || 0);
+
+        // If timer was running, calculate elapsed time
+        if (state.isTimerRunning && state.timerStartTime) {
+          const elapsed = Math.floor((Date.now() - state.timerStartTime) / 1000);
+          setSeconds(elapsed);
+          setIsTimerRunning(true);
+          setTimerStartTime(state.timerStartTime);
+        } else {
+          setSeconds(state.seconds || 0);
+          setIsTimerRunning(false);
+          setTimerStartTime(null);
+        }
+      } catch (e) {
+        console.error('Failed to load state:', e);
+      }
+    }
+    setIsInitialized(true);
+  }, []);
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const state = {
+      player1Name,
+      player2Name,
+      player1Score,
+      player2Score,
+      seconds,
+      isTimerRunning,
+      timerStartTime,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [player1Name, player2Name, player1Score, player2Score, seconds, isTimerRunning, timerStartTime, isInitialized]);
+
+  // Timer interval
+  useEffect(() => {
+    if (isTimerRunning && timerStartTime) {
       intervalRef.current = setInterval(() => {
-        setSeconds(s => s + 1);
+        const elapsed = Math.floor((Date.now() - timerStartTime) / 1000);
+        setSeconds(elapsed);
       }, 1000) as unknown as number;
     } else {
       if (intervalRef.current) {
@@ -26,7 +77,7 @@ export default function App() {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isTimerRunning]);
+  }, [isTimerRunning, timerStartTime]);
 
   const formatTime = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
@@ -41,10 +92,13 @@ export default function App() {
       setPlayer2Score(s => s + 1);
     }
     setIsTimerRunning(false);
+    setTimerStartTime(null);
   };
 
   const handleTimerStart = () => {
+    const now = Date.now();
     setSeconds(0);
+    setTimerStartTime(now);
     setIsTimerRunning(true);
   };
 
@@ -53,6 +107,8 @@ export default function App() {
     setPlayer2Score(0);
     setSeconds(0);
     setIsTimerRunning(false);
+    setTimerStartTime(null);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   return (
