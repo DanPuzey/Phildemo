@@ -349,52 +349,74 @@ body {
   padding: 2rem;
 }
 
-.frame-list {
+.chart-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.frame-record {
-  background: rgba(0, 255, 255, 0.05);
-  border: 1px solid rgba(0, 255, 255, 0.3);
-  border-radius: 10px;
-  padding: 1rem;
+.chart-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  transition: all 0.3s ease;
+  gap: 1rem;
 }
 
-.frame-record:hover {
-  background: rgba(0, 255, 255, 0.1);
-  border-color: rgba(0, 255, 255, 0.5);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-}
-
-.frame-number {
-  color: #ff00ff;
-  font-weight: bold;
-  font-size: 1.1rem;
-  text-shadow: 0 0 5px rgba(255, 0, 255, 0.6);
-}
-
-.frame-winner {
-  color: #00ff00;
-  font-weight: bold;
-  font-size: 1.1rem;
-  flex: 1;
-  text-align: center;
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.6);
-}
-
-.frame-time {
+.chart-label {
   color: #00ffff;
   font-weight: bold;
-  font-size: 1.2rem;
-  font-family: 'Courier New', monospace;
-  letter-spacing: 2px;
+  font-size: 0.9rem;
+  min-width: 70px;
+  text-align: right;
   text-shadow: 0 0 5px rgba(0, 255, 255, 0.6);
+}
+
+.chart-bar-container {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  height: 40px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.chart-bar {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.75rem;
+  transition: all 0.3s ease;
+  position: relative;
+  min-width: 60px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.bar-player1 {
+  background: linear-gradient(90deg, #00ffff 0%, #00cccc 100%);
+  border: 1px solid #00ffff;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.bar-player2 {
+  background: linear-gradient(90deg, #ff00ff 0%, #cc00cc 100%);
+  border: 1px solid #ff00ff;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+}
+
+.chart-bar:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+}
+
+.bar-time {
+  color: #000;
+  font-weight: bold;
+  font-size: 0.9rem;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+  letter-spacing: 1px;
 }
 
 @media (max-width: 768px) {
@@ -441,13 +463,23 @@ body {
     width: 100%;
   }
 
-  .frame-record {
+  .chart-row {
     flex-direction: column;
+    align-items: flex-start;
     gap: 0.5rem;
-    text-align: center;
   }
 
-  .frame-winner {
-    text-align: center;
+  .chart-label {
+    min-width: auto;
+    text-align: left;
+    font-size: 0.85rem;
+  }
+
+  .chart-bar-container {
+    width: 100%;
+  }
+
+  .bar-time {
+    font-size: 0.8rem;
   }
 }

@@ -226,16 +226,30 @@ export default function App() {
               {frameHistory.length === 0 ? (
                 <p className="no-data">No frames recorded yet</p>
               ) : (
-                <div className="frame-list">
-                  {frameHistory.map((frame, index) => (
-                    <div key={index} className="frame-record">
-                      <div className="frame-number">Frame {index + 1}</div>
-                      <div className="frame-winner">
-                        Winner: {frame.winner === 1 ? frame.player1Name : frame.player2Name}
-                      </div>
-                      <div className="frame-time">{formatTime(frame.time)}</div>
-                    </div>
-                  ))}
+                <div className="chart-container">
+                  {(() => {
+                    const maxTime = Math.max(...frameHistory.map(f => f.time));
+                    return frameHistory.map((frame, index) => {
+                      const barWidth = maxTime > 0 ? (frame.time / maxTime) * 100 : 0;
+                      const winnerClass = frame.winner === 1 ? 'bar-player1' : 'bar-player2';
+                      return (
+                        <div key={index} className="chart-row">
+                          <div className="chart-label">
+                            Frame {index + 1}
+                          </div>
+                          <div className="chart-bar-container">
+                            <div
+                              className={`chart-bar ${winnerClass}`}
+                              style={{ width: `${barWidth}%` }}
+                              title={`${frame.winner === 1 ? frame.player1Name : frame.player2Name} - ${formatTime(frame.time)}`}
+                            >
+                              <span className="bar-time">{formatTime(frame.time)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               )}
             </div>
