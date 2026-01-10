@@ -3,6 +3,13 @@ import './App.css';
 
 const STORAGE_KEY = 'pool-scoreboard-state';
 
+interface FrameRecord {
+  winner: 1 | 2;
+  time: number;
+  player1Name: string;
+  player2Name: string;
+}
+
 export default function App() {
   const [player1Name, setPlayer1Name] = useState('Player 1');
   const [player2Name, setPlayer2Name] = useState('Player 2');
@@ -11,6 +18,8 @@ export default function App() {
   const [seconds, setSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerStartTime, setTimerStartTime] = useState<number | null>(null);
+  const [frameHistory, setFrameHistory] = useState<FrameRecord[]>([]);
+  const [showStats, setShowStats] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -24,6 +33,7 @@ export default function App() {
         setPlayer2Name(state.player2Name || 'Player 2');
         setPlayer1Score(state.player1Score || 0);
         setPlayer2Score(state.player2Score || 0);
+        setFrameHistory(state.frameHistory || []);
 
         // If timer was running, calculate elapsed time
         if (state.isTimerRunning && state.timerStartTime) {
@@ -55,9 +65,10 @@ export default function App() {
       seconds,
       isTimerRunning,
       timerStartTime,
+      frameHistory,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [player1Name, player2Name, player1Score, player2Score, seconds, isTimerRunning, timerStartTime, isInitialized]);
+  }, [player1Name, player2Name, player1Score, player2Score, seconds, isTimerRunning, timerStartTime, frameHistory, isInitialized]);
 
   // Timer interval
   useEffect(() => {
@@ -91,6 +102,16 @@ export default function App() {
     } else {
       setPlayer2Score(s => s + 1);
     }
+
+    // Record the frame in history
+    const frameRecord: FrameRecord = {
+      winner: player,
+      time: seconds,
+      player1Name,
+      player2Name,
+    };
+    setFrameHistory(prev => [...prev, frameRecord]);
+
     setIsTimerRunning(false);
     setTimerStartTime(null);
   };
@@ -108,6 +129,8 @@ export default function App() {
     setSeconds(0);
     setIsTimerRunning(false);
     setTimerStartTime(null);
+    setFrameHistory([]);
+    setShowStats(false);
     localStorage.removeItem(STORAGE_KEY);
   };
 
@@ -167,14 +190,58 @@ export default function App() {
           </div>
         </div>
 
-        <button
-          className="reset-btn"
-          onClick={handleReset}
-          aria-label="Reset game"
-        >
-          New Game
-        </button>
+        <div className="action-buttons">
+          <button
+            className="stats-btn"
+            onClick={() => setShowStats(true)}
+            aria-label="View statistics"
+            disabled={frameHistory.length === 0}
+          >
+            Stats
+          </button>
+          <button
+            className="reset-btn"
+            onClick={handleReset}
+            aria-label="Reset game"
+          >
+            New Game
+          </button>
+        </div>
       </div>
+
+      {showStats && (
+        <div className="modal-overlay" onClick={() => setShowStats(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Frame Statistics</h2>
+              <button
+                className="modal-close"
+                onClick={() => setShowStats(false)}
+                aria-label="Close statistics"
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              {frameHistory.length === 0 ? (
+                <p className="no-data">No frames recorded yet</p>
+              ) : (
+                <div className="frame-list">
+                  {frameHistory.map((frame, index) => (
+                    <div key={index} className="frame-record">
+                      <div className="frame-number">Frame {index + 1}</div>
+                      <div className="frame-winner">
+                        Winner: {frame.winner === 1 ? frame.player1Name : frame.player2Name}
+                      </div>
+                      <div className="frame-time">{formatTime(frame.time)}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
