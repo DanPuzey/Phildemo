@@ -79,4 +79,4 @@ Open http://localhost:3000 in your browser.
 - **Runtime**: Bun (server + bundler)
 - **Styling**: Pure CSS with futuristic cyberpunk theme
 - **Container**: Single Docker image with data mount point
-- **State**: Local React state (no persistence)
+- **State**: React state with localStorage persistence

@@ -227,6 +227,16 @@ export default function App() {
                 <p className="no-data">No frames recorded yet</p>
               ) : (
                 <div className="chart-container">
+                  <div className="chart-legend">
+                    <div className="legend-item">
+                      <span className="legend-color bar-player1"></span>
+                      <span className="legend-label">{frameHistory[0]?.player1Name || 'Player 1'}</span>
+                    </div>
+                    <div className="legend-item">
+                      <span className="legend-color bar-player2"></span>
+                      <span className="legend-label">{frameHistory[0]?.player2Name || 'Player 2'}</span>
+                    </div>
+                  </div>
                   {(() => {
                     const maxTime = Math.max(...frameHistory.map(f => f.time));
                     return frameHistory.map((frame, index) => {
