@@ -8,6 +8,8 @@ interface FrameRecord {
   time: number;
   player1Name: string;
   player2Name: string;
+  player1Fouls: number;
+  player2Fouls: number;
 }
 
 export default function App() {
@@ -15,6 +17,8 @@ export default function App() {
   const [player2Name, setPlayer2Name] = useState('Player 2');
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
+  const [player1Fouls, setPlayer1Fouls] = useState(0);
+  const [player2Fouls, setPlayer2Fouls] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerStartTime, setTimerStartTime] = useState<number | null>(null);
@@ -33,6 +37,8 @@ export default function App() {
         setPlayer2Name(state.player2Name || 'Player 2');
         setPlayer1Score(state.player1Score || 0);
         setPlayer2Score(state.player2Score || 0);
+        setPlayer1Fouls(state.player1Fouls || 0);
+        setPlayer2Fouls(state.player2Fouls || 0);
         setFrameHistory(state.frameHistory || []);
 
         // If timer was running, calculate elapsed time
@@ -62,13 +68,15 @@ export default function App() {
       player2Name,
       player1Score,
       player2Score,
+      player1Fouls,
+      player2Fouls,
       seconds,
       isTimerRunning,
       timerStartTime,
       frameHistory,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [player1Name, player2Name, player1Score, player2Score, seconds, isTimerRunning, timerStartTime, frameHistory, isInitialized]);
+  }, [player1Name, player2Name, player1Score, player2Score, player1Fouls, player2Fouls, seconds, isTimerRunning, timerStartTime, frameHistory, isInitialized]);
 
   // Timer interval
   useEffect(() => {
@@ -109,11 +117,23 @@ export default function App() {
       time: seconds,
       player1Name,
       player2Name,
+      player1Fouls,
+      player2Fouls,
     };
     setFrameHistory(prev => [...prev, frameRecord]);
 
+    setPlayer1Fouls(0);
+    setPlayer2Fouls(0);
     setIsTimerRunning(false);
     setTimerStartTime(null);
+  };
+
+  const handleFoul = (player: 1 | 2, delta: number) => {
+    if (player === 1) {
+      setPlayer1Fouls(f => Math.max(0, f + delta));
+    } else {
+      setPlayer2Fouls(f => Math.max(0, f + delta));
+    }
   };
 
   const handleTimerStart = () => {
@@ -126,6 +146,8 @@ export default function App() {
   const handleReset = () => {
     setPlayer1Score(0);
     setPlayer2Score(0);
+    setPlayer1Fouls(0);
+    setPlayer2Fouls(0);
     setSeconds(0);
     setIsTimerRunning(false);
     setTimerStartTime(null);
@@ -160,13 +182,25 @@ export default function App() {
               aria-label="Player 1 name"
             />
             <div className="score">{player1Score}</div>
-            <button
-              className="score-btn"
-              onClick={() => handleScore(1)}
-              aria-label={`Increment ${player1Name} score`}
-            >
-              + Frame
-            </button>
+            <div className="score-actions">
+              <button
+                className="score-btn"
+                onClick={() => handleScore(1)}
+                aria-label={`Increment ${player1Name} score`}
+              >
+                + Frame
+              </button>
+              <button
+                className="foul-btn"
+                onClick={() => handleFoul(1, 1)}
+                onContextMenu={(e) => { e.preventDefault(); handleFoul(1, -1); }}
+                aria-label={`Add foul for ${player1Name} (right-click or long-press to decrement)`}
+                title="Tap to add foul · right-click/long-press to decrement"
+              >
+                <span className="foul-label">Foul</span>
+                <span className="foul-count">{player1Fouls}</span>
+              </button>
+            </div>
           </div>
 
           <div className="vs">VS</div>
@@ -180,14 +214,32 @@ export default function App() {
               aria-label="Player 2 name"
             />
             <div className="score">{player2Score}</div>
-            <button
-              className="score-btn"
-              onClick={() => handleScore(2)}
-              aria-label={`Increment ${player2Name} score`}
-            >
-              + Frame
-            </button>
+            <div className="score-actions">
+              <button
+                className="score-btn"
+                onClick={() => handleScore(2)}
+                aria-label={`Increment ${player2Name} score`}
+              >
+                + Frame
+              </button>
+              <button
+                className="foul-btn"
+                onClick={() => handleFoul(2, 1)}
+                onContextMenu={(e) => { e.preventDefault(); handleFoul(2, -1); }}
+                aria-label={`Add foul for ${player2Name} (right-click or long-press to decrement)`}
+                title="Tap to add foul · right-click/long-press to decrement"
+              >
+                <span className="foul-label">Foul</span>
+                <span className="foul-count">{player2Fouls}</span>
+              </button>
+            </div>
           </div>
+        </div>
+
+        <div className="fouls-note" aria-live="polite">
+          Frame fouls — <span className="fouls-note-p1">{player1Name}: {player1Fouls}</span>
+          <span className="fouls-note-sep"> · </span>
+          <span className="fouls-note-p2">{player2Name}: {player2Fouls}</span>
         </div>
 
         <div className="action-buttons">
@@ -241,9 +293,13 @@ export default function App() {
                             <div
                               className={`chart-bar ${winnerClass}`}
                               style={{ width: `${barWidth}%` }}
-                              title={`${frame.winner === 1 ? frame.player1Name : frame.player2Name} - ${formatTime(frame.time)}`}
+                              title={`${frame.winner === 1 ? frame.player1Name : frame.player2Name} - ${formatTime(frame.time)} · Fouls ${frame.player1Name} ${frame.player1Fouls ?? 0} / ${frame.player2Name} ${frame.player2Fouls ?? 0}`}
                             >
                               <span className="bar-time">{formatTime(frame.time)}</span>
+                            </div>
+                            <div className="chart-fouls">
+                              <span className="chart-foul chart-foul-p1">F {frame.player1Fouls ?? 0}</span>
+                              <span className="chart-foul chart-foul-p2">F {frame.player2Fouls ?? 0}</span>
                             </div>
                           </div>
                         </div>
