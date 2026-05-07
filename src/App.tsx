@@ -26,6 +26,8 @@ export default function App() {
   const [showStats, setShowStats] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const intervalRef = useRef<number | null>(null);
+  const longPressTimeoutRef = useRef<number | null>(null);
+  const [isTimerPressed, setIsTimerPressed] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Load state from localStorage on mount
@@ -144,6 +146,35 @@ export default function App() {
     setIsTimerRunning(true);
   };
 
+  const TIMER_LONG_PRESS_MS = 700;
+
+  const clearLongPressTimer = () => {
+    if (longPressTimeoutRef.current !== null) {
+      clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+  };
+
+  const handleTimerPressStart = () => {
+    if (!isTimerRunning) return;
+    setIsTimerPressed(true);
+    clearLongPressTimer();
+    longPressTimeoutRef.current = window.setTimeout(() => {
+      longPressTimeoutRef.current = null;
+      setIsTimerPressed(false);
+      setSeconds(0);
+      setIsTimerRunning(false);
+      setTimerStartTime(null);
+    }, TIMER_LONG_PRESS_MS);
+  };
+
+  const handleTimerPressEnd = () => {
+    clearLongPressTimer();
+    setIsTimerPressed(false);
+  };
+
+  useEffect(() => () => clearLongPressTimer(), []);
+
   const handleReset = () => {
     setPlayer1Score(0);
     setPlayer2Score(0);
@@ -162,7 +193,20 @@ export default function App() {
     <div className="app">
       <div className="scoreboard">
         <div className="timer-section">
-          <div className="timer">{formatTime(seconds)}</div>
+          <div
+            className={`timer${isTimerRunning ? ' timer-active' : ''}${isTimerPressed ? ' timer-pressed' : ''}`}
+            onPointerDown={handleTimerPressStart}
+            onPointerUp={handleTimerPressEnd}
+            onPointerLeave={handleTimerPressEnd}
+            onPointerCancel={handleTimerPressEnd}
+            onContextMenu={(e) => { if (isTimerRunning) e.preventDefault(); }}
+            role={isTimerRunning ? 'button' : undefined}
+            tabIndex={isTimerRunning ? 0 : undefined}
+            aria-label={isTimerRunning ? 'Timer running. Press and hold to reset.' : undefined}
+            title={isTimerRunning ? 'Press and hold to reset' : undefined}
+          >
+            {formatTime(seconds)}
+          </div>
           {!isTimerRunning && (
             <button
               className="timer-btn"
@@ -171,6 +215,9 @@ export default function App() {
             >
               Start Timer
             </button>
+          )}
+          {isTimerRunning && (
+            <div className="timer-hint" aria-hidden="true">Hold to reset</div>
           )}
         </div>
 

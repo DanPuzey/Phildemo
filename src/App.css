@@ -72,6 +72,44 @@ body {
   letter-spacing: 6px;
   min-width: 150px;
   text-align: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 10px;
+  transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.timer-active {
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.timer-active:focus-visible {
+  outline: 3px solid #ffff00;
+  outline-offset: 3px;
+}
+
+.timer-pressed {
+  color: #ff5555;
+  text-shadow:
+    0 0 12px rgba(255, 85, 85, 0.9),
+    0 0 24px rgba(255, 85, 85, 0.5);
+  background: rgba(255, 0, 0, 0.08);
+  animation: timer-press-shrink 0.7s ease-out forwards;
+}
+
+@keyframes timer-press-shrink {
+  from { transform: scale(1); }
+  to { transform: scale(0.92); }
+}
+
+.timer-hint {
+  font-size: 0.7rem;
+  color: #ff5555;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(255, 85, 85, 0.5);
+  opacity: 0.75;
 }
 
 .timer-btn {
