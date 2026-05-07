@@ -24,6 +24,7 @@ export default function App() {
   const [timerStartTime, setTimerStartTime] = useState<number | null>(null);
   const [frameHistory, setFrameHistory] = useState<FrameRecord[]>([]);
   const [showStats, setShowStats] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -153,6 +154,7 @@ export default function App() {
     setTimerStartTime(null);
     setFrameHistory([]);
     setShowStats(false);
+    setShowResetConfirm(false);
     localStorage.removeItem(STORAGE_KEY);
   };
 
@@ -253,7 +255,7 @@ export default function App() {
           </button>
           <button
             className="reset-btn"
-            onClick={handleReset}
+            onClick={() => setShowResetConfirm(true)}
             aria-label="Reset game"
           >
             New Game
@@ -308,6 +310,45 @@ export default function App() {
                   })()}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showResetConfirm && (
+        <div className="modal-overlay" onClick={() => setShowResetConfirm(false)}>
+          <div className="modal confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>New Game?</h2>
+              <button
+                className="modal-close"
+                onClick={() => setShowResetConfirm(false)}
+                aria-label="Cancel new game"
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="confirm-message">
+                Starting a new game will reset both scores, fouls, the timer, and the frame history. This cannot be undone.
+              </p>
+              <div className="confirm-actions">
+                <button
+                  className="confirm-cancel-btn"
+                  onClick={() => setShowResetConfirm(false)}
+                  aria-label="Cancel new game"
+                >
+                  Cancel
+                </button>
+                <button
+                  className="confirm-reset-btn"
+                  onClick={handleReset}
+                  aria-label="Confirm new game and reset scores"
+                  autoFocus
+                >
+                  New Game
+                </button>
+              </div>
             </div>
           </div>
         </div>
